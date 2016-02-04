@@ -1,10 +1,10 @@
 package models
 
 import (
-	"bytes"
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
 	"time"
 )
 
@@ -42,7 +42,7 @@ func AllUsers(ctx *gin.Context) ([]*User, error) {
 
 func FindUser(ctx *gin.Context) (*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
-	email := ctx.PostForm("email")
+	email := strings.ToLower(ctx.PostForm("email"))
 	user := new(User)
 	err := db.QueryRow("SELECT * FROM classmates WHERE email=$1;", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
@@ -55,11 +55,14 @@ func AddUser(ctx *gin.Context) (*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
 	user := new(User)
 	user.Name = ctx.PostForm("name")
-	user.Email = ctx.PostForm("email")
+	user.Email = strings.ToLower(ctx.PostForm("email"))
 	b, err := bcrypt.GenerateFromPassword([]byte(ctx.PostForm("password")+"my secret pepper"), bcrypt.DefaultCost) // TODO MUST replace pepper string
-	n := bytes.IndexByte(b, 0)
-	user.Password = string(b[:n])
-	err = db.QueryRow("INSERT INTO classmates(name,email,password) VALUES($1,$2,$3) returning id;", &user.Name, &user.Email, &user.Password).Scan(&user.Id)
+
+	if err != nil {
+		return nil, err
+	}
+	user.Password = string(b)
+	err = db.QueryRow("INSERT INTO classmates(name,email,password) VALUES($1,$2,$3) returning id, created_at, updated_at;", &user.Name, &user.Email, &user.Password).Scan(&user.Id, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +72,7 @@ func AddUser(ctx *gin.Context) (*User, error) {
 
 func RemoveUser(ctx *gin.Context) (bool, error) {
 	db := ctx.MustGet("db").(*sql.DB)
-	email := ctx.Param("email")
+	email := strings.ToLower(ctx.Param("email"))
 	_, err := db.Exec("DELETE FROM classmates WHERE email=$1", email)
 	if err != nil {
 		return false, err
