@@ -1,6 +1,6 @@
 {
-  "name": "LearnLink React Client",
-  "version": "0.1",
+  "name": "learnlink-react-client",
+  "version": "0.0.1",
   "description": "An app for keeping track of online study links built on react-slingshot by coryhouse",
   "scripts": {
     "prestart": "npm run remove-dist",
