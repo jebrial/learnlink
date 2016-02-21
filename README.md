@@ -1,7 +1,7 @@
 # LearnLink: a way to organize links to online study topics.
 ===========================================================
 
-### by Gabe Dalay and Howard Kim
+### by Gabe Dalay
 --------------------------------
 
 
@@ -33,3 +33,5 @@ Let's say you have added a few courses.
 
 ### Client-Side Setup
 ---------------------
+
+Giving React a whirl! Using [React Slingshot](https://github.com/coryhouse/react-slingshot)
