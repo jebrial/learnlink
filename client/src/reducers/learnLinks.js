@@ -24,12 +24,12 @@ export default function learnLinkAppState(state = initialState, action) {
     case SELECT_LEARNLINK:
           newState = Object.assign({}, state);
           newState.selectedLearnLink = state.learnLinks.find(learnLink =>
-            learnLink.id = action.id
+            learnLink.id === action.id
           );
           return newState;
     case CHANGE_NAME:
         newState = Object.assign({}, state);
-        newState.heroes = newState.learnLinks.map(learnLink => {
+        newState.learnLinks = newState.learnLinks.map(learnLink => {
             if (learnLink.id === action.id) {
               learnLink.name = action.newName;
             }

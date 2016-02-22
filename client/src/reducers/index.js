@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import learnLinkAppState from './learnLink';
+import learnLinkAppState from './learnLinks';
 
 const rootReducer = combineReducers({
   learnLinkAppState
