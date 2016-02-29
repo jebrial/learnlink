@@ -35,3 +35,4 @@ Let's say you have added a few courses.
 ---------------------
 
 Giving React a whirl! Using [React Slingshot](https://github.com/coryhouse/react-slingshot)
+stashing this branch for now
