@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Courses from './components/courses';
-import CourseDetail from './components/course_detail';
-import AddCourse from './components/add_course';
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            courses: [],
-            selectedCourse: null
+            courses: []
         };
     }
 
@@ -41,18 +38,14 @@ class App extends Component {
         ];
 
         this.setState({
-            courses: courses,
-            selectedCourse: courses[0]
+            courses: courses
         });
 
     }
     render() {
         return (
             <div>
-                <CourseDetail course={this.state.selectedCourse} />
-                <AddCourse />
                 <Courses
-                    onCourseSelect={ selectedCourse => this.setState({selectedCourse}) }
                     courses={this.state.courses} />
             </div>
         );
