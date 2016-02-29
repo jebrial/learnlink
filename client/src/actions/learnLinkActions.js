@@ -15,3 +15,7 @@ export function changeNote(id, newNote) {
 export function selectLearnLink(id) {
   return { type: types.SELECT_LEARNLINK, id };
 }
+
+export function addLearnLink(newLearnLink) {
+  return { type: types.ADD_LEARNLINK, newLearnLink };
+}
