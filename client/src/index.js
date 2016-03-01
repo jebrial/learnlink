@@ -1,6 +1,16 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import Courses from './components/courses';
+import CourseNav from './components/course_nav';
+
+// Needed for onTouchTap
+import injectTapEventPlugin from 'react-tap-event-plugin';
+injectTapEventPlugin();
+// Can go away when react 1.0 release
+// Check this repo:
+// https://github.com/zilverline/react-tap-event-plugin
+
+
 
 class App extends Component {
     constructor(props) {
@@ -45,6 +55,7 @@ class App extends Component {
     render() {
         return (
             <div>
+                <CourseNav />
                 <Courses
                     courses={this.state.courses} />
             </div>
