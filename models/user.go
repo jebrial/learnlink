@@ -2,14 +2,16 @@ package models
 
 import (
 	"database/sql"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
+//User -
 type User struct {
-	Id        int       `json:"id"`
+	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
@@ -17,18 +19,19 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+//AllUsers -
 func AllUsers(ctx *gin.Context) ([]*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
-	rows, err := db.Query("SELECT * FROM classmates")
+	rows, err := db.Query("SELECT * FROM users")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	users := make([]*User, 0)
+	var users []*User
 	for rows.Next() {
 		user := new(User)
-		err := rows.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -40,17 +43,19 @@ func AllUsers(ctx *gin.Context) ([]*User, error) {
 	return users, nil
 }
 
+//FindUser -
 func FindUser(ctx *gin.Context) (*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
 	email := strings.ToLower(ctx.PostForm("email"))
 	user := new(User)
-	err := db.QueryRow("SELECT * FROM classmates WHERE email=$1;", email).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM users WHERE email=$1;", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
+//AddUser -
 func AddUser(ctx *gin.Context) (*User, error) {
 	db := ctx.MustGet("db").(*sql.DB)
 	user := new(User)
@@ -62,7 +67,7 @@ func AddUser(ctx *gin.Context) (*User, error) {
 		return nil, err
 	}
 	user.Password = string(b)
-	err = db.QueryRow("INSERT INTO classmates(name,email,password) VALUES($1,$2,$3) returning id, created_at, updated_at;", &user.Name, &user.Email, &user.Password).Scan(&user.Id, &user.CreatedAt, &user.UpdatedAt)
+	err = db.QueryRow("INSERT INTO users(name,email,password) VALUES($1,$2,$3) returning id, created_at, updated_at;", &user.Name, &user.Email, &user.Password).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -70,10 +75,11 @@ func AddUser(ctx *gin.Context) (*User, error) {
 	return user, nil
 }
 
+//RemoveUser -
 func RemoveUser(ctx *gin.Context) (bool, error) {
 	db := ctx.MustGet("db").(*sql.DB)
 	email := strings.ToLower(ctx.Param("email"))
-	_, err := db.Exec("DELETE FROM classmates WHERE email=$1", email)
+	_, err := db.Exec("DELETE FROM users WHERE email=$1", email)
 	if err != nil {
 		return false, err
 	}
@@ -81,7 +87,7 @@ func RemoveUser(ctx *gin.Context) (bool, error) {
 }
 
 /*
-CREATE TABLE "classmates" (
+CREATE TABLE "users" (
 	id bigserial primary key,
 	name varchar(50) NOT NULL,
 	email varchar(50) NOT NULL,
@@ -91,6 +97,6 @@ CREATE TABLE "classmates" (
 	unique(email)
 );
 
-INSERT INTO "classmates" (name,email, password) VALUES ('rick','plumbus@fleeb.com','hashedpassword'), ('morty', 'dumbus@fleeb.com', 'hashedpassword');
+INSERT INTO "users" (name,email, password) VALUES ('rick','plumbus@fleeb.com','hashedpassword'), ('morty', 'dumbus@fleeb.com', 'hashedpassword');
 
 */

@@ -2,21 +2,23 @@ package main
 
 import (
 	"encoding/json"
+	"log"
+	"os"
+	"time"
+
 	jwtLib "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/contrib/jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/jebrial/learnlink/models"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"os"
-	"time"
 )
 
-type Conf struct {
-	Url string
+type conf struct {
+	URL string
 }
 
 var (
+	//SECRET -
 	SECRET = "SECRETHERE"
 )
 
@@ -27,14 +29,14 @@ func dbWare() gin.HandlerFunc {
 		log.Panic(err)
 	}
 	decoder := json.NewDecoder(file)
-	conf := Conf{}
+	var conf = conf{}
 
 	err = decoder.Decode(&conf)
 	if err != nil {
 		log.Panic(err)
 	}
 	// connect to the database
-	db, err := models.NewDB(conf.Url)
+	db, err := models.NewDB(conf.URL)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -51,24 +53,23 @@ func main() {
 	ginServer.Use(dbWare())
 
 	//login public routes
-	ginServer.POST("/login", UserLogin)
-	ginServer.POST("/signup", UserAdd)
+	ginServer.POST("/login", userLogin)
+	ginServer.POST("/signup", userAdd)
 	//set up private routes
 	private := ginServer.Group("/api")
 	private.Use(jwt.Auth(SECRET))
 	// user private /api routes
-	private.DELETE("/user/delete/:email", UserRemove)
+	private.DELETE("/user/delete/:email", userRemove)
 
-	//course rivate /api routes
-	private.GET("/course/all/:email", CourseIndex)
-	private.POST("/course/new", CourseAdd)
-	private.PUT("/course/update/:id", CourseUpdate)
-	private.DELETE("/course/delete/:id", CourseRemove)
+	//link private /api routes
+	private.GET("/link/all/:email", linkIndex)
+	private.POST("/link/new", linkAdd)
+	private.PUT("/link/update/:id", linkUpdate)
 
 	ginServer.Run(":3001")
 }
 
-func UserLogin(ctx *gin.Context) {
+func userLogin(ctx *gin.Context) {
 	user, err := models.FindUser(ctx)
 	if err != nil {
 		ctx.JSON(404, gin.H{"error": "error loging in"})
@@ -89,7 +90,7 @@ func UserLogin(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"user": user, "token": tokenString})
 }
 
-func UserAdd(ctx *gin.Context) {
+func userAdd(ctx *gin.Context) {
 	user, err := models.AddUser(ctx)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Internal error"})
@@ -106,7 +107,7 @@ func UserAdd(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"user": user, "token": tokenString, "success": "New user added"})
 }
 
-func UserRemove(ctx *gin.Context) {
+func userRemove(ctx *gin.Context) {
 	_, err := models.RemoveUser(ctx)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Internal error"})
@@ -115,8 +116,8 @@ func UserRemove(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"success": "User removed"})
 }
 
-func CourseIndex(ctx *gin.Context) {
-	courses, err := models.AllCourses(ctx)
+func linkIndex(ctx *gin.Context) {
+	courses, err := models.AllLinks(ctx)
 	if err != nil {
 		log.Fatal(err)
 		ctx.JSON(404, gin.H{"error": "No courses found"})
@@ -125,8 +126,8 @@ func CourseIndex(ctx *gin.Context) {
 	ctx.JSON(200, courses)
 }
 
-func CourseAdd(ctx *gin.Context) {
-	_, err := models.AddCourse(ctx)
+func linkAdd(ctx *gin.Context) {
+	_, err := models.AddLink(ctx)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Internal error"})
 		return
@@ -134,20 +135,11 @@ func CourseAdd(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{"success": "New course added"})
 }
 
-func CourseUpdate(ctx *gin.Context) {
-	_, err := models.UpdateCourse(ctx)
+func linkUpdate(ctx *gin.Context) {
+	_, err := models.UpdateLink(ctx)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": "Error processing request"})
 		return
 	}
-	ctx.JSON(200, gin.H{"success": "Course updated"})
-}
-
-func CourseRemove(ctx *gin.Context) {
-	_, err := models.RemoveCourse(ctx)
-	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Internal error"})
-		return
-	}
-	ctx.JSON(200, gin.H{"success": "Course removed"})
+	ctx.JSON(200, gin.H{"success": "Link updated"})
 }
